@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import { IsDate, IsString } from 'class-validator';
 
 export class CreateProjectDto {
@@ -7,9 +8,11 @@ export class CreateProjectDto {
     @IsString()
     description: string;
 
+    @Transform(({ value }) => new Date(value))
     @IsDate()
     initialDate: Date;
 
+    @Transform(({ value }) => new Date(value))
     @IsDate()
     finalDate: Date;
 }
