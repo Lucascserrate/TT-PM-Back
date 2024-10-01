@@ -9,5 +9,5 @@ export class CreateTaskDto {
     description: string;
 
     @IsEnum(TaskStatus)
-    status: string;
+    status: TaskStatus;
 }

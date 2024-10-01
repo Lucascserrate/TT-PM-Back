@@ -1,4 +1,44 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { TaskEntity } from './task.entity';
+import { Repository } from 'typeorm';
+import { UpdateTaskDto } from './dto/update-task.dto';
+import { CreateTaskDto } from './dto/create-task.dto';
+import { TaskError } from './exceptions/task.enum';
 
 @Injectable()
-export class TaskService {}
+export class TaskService {
+    constructor(@InjectRepository(TaskEntity) private taskRepository: Repository<TaskEntity>) { }
+
+    async findOne(id: number) {
+        const taskFound = await this.taskRepository.findOne({ where: { id } });
+        if (!taskFound) {
+            throw new HttpException(TaskError.NOT_FOUND, HttpStatus.NOT_FOUND);
+        }
+        return taskFound;
+    }
+
+    create(task: CreateTaskDto): Promise<TaskEntity> {
+        try {
+            const newTask = this.taskRepository.create(task);
+            return this.taskRepository.save(newTask);
+
+        } catch (error) {
+            throw new HttpException(TaskError.SOMETHING_WENT_WRONG_CREATING, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    async update(id: number, task: Partial<UpdateTaskDto>) {
+        try {
+            const taskFound = await this.taskRepository.findOne({ where: { id } });
+            if (!taskFound)
+                throw new HttpException(TaskError.NOT_FOUND, HttpStatus.NOT_FOUND);
+
+            const updatedTask = Object.assign(taskFound, task);
+            return this.taskRepository.save(updatedTask);
+        } catch (error) {
+            throw new HttpException(TaskError.SOMETHING_WENT_WRONG_UPDATING, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+}
