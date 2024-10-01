@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProjectEntity } from './project.entity';
@@ -25,21 +25,21 @@ export class ProjectService {
     async update(id: number, project: UpdateProjectDto) {
         const projectFound = await this.projectRepository.findOne({ where: { id } });
 
-        if (!projectFound) return new HttpException('Project not found', 404);
+        if (!projectFound) return new HttpException('Project not found', HttpStatus.NOT_FOUND);
         const updateProject = Object.assign(projectFound, project);
         return this.projectRepository.save(updateProject);
     }
 
     async partialUpdate(id: number, project: Partial<ProjectEntity>) {
         const projectFound = await this.projectRepository.findOne({ where: { id } });
-        if (!projectFound) return new HttpException('Project not found', 404);
+        if (!projectFound) return new HttpException('Project not found', HttpStatus.NOT_FOUND);
         const updateProject = Object.assign(projectFound, project);
         return this.projectRepository.save(updateProject);
     }
 
     async remove(id: number) {
         const res = await this.projectRepository.delete(id);
-        if (res.affected === 0) return new HttpException('Project not found', 404);
+        if (res.affected === 0) return new HttpException('Project not found', HttpStatus.NOT_FOUND);
         return res;
     }
 }
