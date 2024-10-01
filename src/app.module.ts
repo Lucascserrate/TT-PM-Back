@@ -1,11 +1,25 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProjectModule } from './project/project.module';
+import { UserModule } from './user/user.module';
+require('dotenv').config();
+const { DB_PASSWORD, DB_PORT, DB_USER, DB_NAME, DB_HOST } = process.env;
 
 @Module({
-  imports: [ProjectModule],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [TypeOrmModule.forRoot({
+    type: 'mysql',
+    host: DB_HOST,
+    port: Number(DB_PORT),
+    username: DB_USER,
+    password: DB_PASSWORD,
+    database: DB_NAME,
+    entities: [__dirname + '/**/*.entity{.ts,.js}'],
+    synchronize: true,
+  }),
+    ProjectModule,
+    UserModule
+  ],
+  controllers: [],
+  providers: [],
 })
-export class AppModule {}
+export class AppModule { }
