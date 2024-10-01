@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProjectModule } from './project/project.module';
 import { UserModule } from './user/user.module';
+import { TaskModule } from './task/task.module';
 require('dotenv').config();
 const { DB_PASSWORD, DB_PORT, DB_USER, DB_NAME, DB_HOST } = process.env;
 
@@ -17,7 +18,8 @@ const { DB_PASSWORD, DB_PORT, DB_USER, DB_NAME, DB_HOST } = process.env;
     synchronize: true,
   }),
     ProjectModule,
-    UserModule
+    UserModule,
+    TaskModule
   ],
   controllers: [],
   providers: [],
