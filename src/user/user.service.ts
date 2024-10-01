@@ -5,47 +5,85 @@ import { Repository } from 'typeorm';
 import { UserEntity } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserError } from './exceptions/user.enum';
 
 @Injectable()
 export class UserService {
     constructor(@InjectRepository(UserEntity) private userRepository: Repository<UserEntity>) { }
 
     findAll() {
-        return this.userRepository.find();
+        try {
+            return this.userRepository.find();
+        } catch (error) {
+            throw new HttpException(
+                UserError.SOMETHING_WENT_WRONG,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        }
     }
 
     async findOne(id: number) {
-        const userFound = await this.userRepository.findOne({ where: { id } });
-        if (!userFound) {
-            return new HttpException('User not found', HttpStatus.NOT_FOUND);
+        try {
+            const userFound = await this.userRepository.findOne({ where: { id } });
+            if (!userFound) {
+                throw new HttpException(UserError.NOT_FOUND, HttpStatus.NOT_FOUND);
+            }
+            return userFound;
+        } catch (error) {
+            throw new HttpException(
+                UserError.SOMETHING_WENT_WRONG_FETCHING,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
         }
-        return userFound;
     }
 
     async create(user: CreateUserDto) {
-        const userFound = await this.userRepository.findOne({ where: { email: user.email } });
+        try {
+            const userFound = await this.userRepository.findOne({ where: { email: user.email } });
 
-        if (userFound) {
-            return new HttpException('User already exists', HttpStatus.CONFLICT);
+            if (userFound) {
+                return new HttpException(UserError.ALREADY_EXISTS, HttpStatus.CONFLICT);
+            }
+            let newUser: UserEntity = this.userRepository.create(user);
+            return this.userRepository.save(newUser);
+        } catch (error) {
+            throw new HttpException(
+                UserError.SOMETHING_WENT_WRONG_CREATING,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
         }
-        const newUser = this.userRepository.create(user);
-        return this.userRepository.save(newUser);
     }
 
     async remove(id: number) {
-        const res = await this.userRepository.delete(id);
+        try {
+            const res = await this.userRepository.delete(id);
 
-        if (res.affected === 0) return new HttpException('User not found', HttpStatus.NOT_FOUND);
+            if (res.affected === 0) return new HttpException(UserError.NOT_FOUND, HttpStatus.NOT_FOUND);
 
-        return res;
+            return res;
+        } catch (error) {
+            throw new HttpException(
+                UserError.SOMETHING_WENT_WRONG_DELETING,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        }
+
     }
 
     async update(id: number, user: UpdateUserDto) {
-        const userFound = await this.userRepository.findOne({ where: { id } });
+        try {
+            const userFound = await this.userRepository.findOne({ where: { id } });
 
-        if (!userFound) return new HttpException('User not found', HttpStatus.NOT_FOUND);
+            if (!userFound) return new HttpException(UserError.NOT_FOUND, HttpStatus.NOT_FOUND);
 
-        const updatedUser = Object.assign(userFound, user);
-        return this.userRepository.save(updatedUser);
+            const updatedUser = Object.assign(userFound, user);
+            return this.userRepository.save(updatedUser);
+        } catch (error) {
+            throw new HttpException(
+                UserError.SOMETHING_WENT_WRONG_UPDATING,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        }
+
     }
 }

@@ -4,42 +4,91 @@ import { Repository } from 'typeorm';
 import { ProjectEntity } from './project.entity';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
+import { ProjectError } from './exceptions/project.enum';
 
 @Injectable()
 export class ProjectService {
     constructor(@InjectRepository(ProjectEntity) private projectRepository: Repository<ProjectEntity>) { }
 
     findAll() {
-        return this.projectRepository.find();
+        try {
+            return this.projectRepository.find();
+        } catch (error) {
+            throw new HttpException(
+                ProjectError.SOMETHING_WENT_WRONG_FETCHING,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        }
     }
 
     findOne(id: number) {
-        return this.projectRepository.findOneBy({ id });
+        try {
+            const projectFound = this.projectRepository.findOneBy({ id });
+            if (!projectFound) return new HttpException(ProjectError.NOT_FOUND, HttpStatus.NOT_FOUND);
+            return projectFound;
+        } catch (error) {
+            throw new HttpException(
+                ProjectError.SOMETHING_WENT_WRONG_FETCHING_ONE,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        }
     }
 
     create(project: CreateProjectDto): Promise<ProjectEntity> {
-        const newProject = this.projectRepository.create(project);
-        return this.projectRepository.save(newProject);
+        try {
+            const newProject = this.projectRepository.create(project);
+            return this.projectRepository.save(newProject);
+        } catch (error) {
+            throw new HttpException(
+                ProjectError.SOMETHING_WENT_WRONG_CREATING,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        }
     }
 
     async update(id: number, project: UpdateProjectDto) {
-        const projectFound = await this.projectRepository.findOne({ where: { id } });
+        try {
+            const projectFound = await this.projectRepository.findOne({ where: { id } });
 
-        if (!projectFound) return new HttpException('Project not found', HttpStatus.NOT_FOUND);
-        const updateProject = Object.assign(projectFound, project);
-        return this.projectRepository.save(updateProject);
+            if (!projectFound) return new HttpException(ProjectError.NOT_FOUND, HttpStatus.NOT_FOUND);
+            const updateProject = Object.assign(projectFound, project);
+            return this.projectRepository.save(updateProject);
+        } catch (error) {
+            throw new HttpException(
+                ProjectError.SOMETHING_WENT_WRONG_UPDATING,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        }
+
     }
 
     async partialUpdate(id: number, project: Partial<ProjectEntity>) {
-        const projectFound = await this.projectRepository.findOne({ where: { id } });
-        if (!projectFound) return new HttpException('Project not found', HttpStatus.NOT_FOUND);
-        const updateProject = Object.assign(projectFound, project);
-        return this.projectRepository.save(updateProject);
+        try {
+            const projectFound = await this.projectRepository.findOne({ where: { id } });
+            if (!projectFound) return new HttpException(ProjectError.NOT_FOUND, HttpStatus.NOT_FOUND);
+            const updateProject = Object.assign(projectFound, project);
+            return this.projectRepository.save(updateProject);
+        } catch (error) {
+            throw new HttpException(
+                ProjectError.SOMETHING_WENT_WRONG_UPDATING,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        }
+
     }
 
     async remove(id: number) {
-        const res = await this.projectRepository.delete(id);
-        if (res.affected === 0) return new HttpException('Project not found', HttpStatus.NOT_FOUND);
-        return res;
+        try {
+            const res = await this.projectRepository.delete(id);
+            if (res.affected === 0) return new HttpException('Project not found', HttpStatus.NOT_FOUND);
+
+            return res;
+        } catch (error) {
+            throw new HttpException(
+                ProjectError.SOMETHING_WENT_WRONG_DELETING,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        }
+
     }
 }
