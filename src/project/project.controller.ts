@@ -3,7 +3,7 @@ import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { ProjectEntity } from './project.entity';
 
-@Controller('project')
+@Controller('projects')
 export class ProjectController {
     constructor(private readonly projectService: ProjectService) { }
 
