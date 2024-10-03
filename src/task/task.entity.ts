@@ -14,7 +14,7 @@ export class TaskEntity {
     @Column()
     description: string;
 
-    @Column()
+    @Column({ type: 'enum', enum: TaskStatus, default: TaskStatus.PENDING })
     status: TaskStatus;
 
     @ManyToOne(() => ProjectEntity, (project) => project.tasks)
