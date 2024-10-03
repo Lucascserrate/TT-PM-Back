@@ -6,4 +6,5 @@ export enum UserError {
   SOMETHING_WENT_WRONG_CREATING = 'Something went wrong while creating a user',
   SOMETHING_WENT_WRONG_UPDATING = 'Something went wrong while updating a user',
   SOMETHING_WENT_WRONG_DELETING = 'Something went wrong while deleting a user',
+  INSUFFICIENT_PERMISSIONS = 'Insufficient permissions',
 }

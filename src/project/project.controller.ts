@@ -1,9 +1,9 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, Param, Patch, Post, Put } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { ProjectEntity } from './project.entity';
 
-@Controller('projects')
+@Controller('project')
 export class ProjectController {
     constructor(private readonly projectService: ProjectService) { }
 
@@ -17,9 +17,9 @@ export class ProjectController {
         return this.projectService.findOne(id);
     }
 
-    @Post()
-    create(@Body() project: CreateProjectDto): Promise<ProjectEntity> {
-        return this.projectService.create(project);
+    @Post(':id')
+    create(@Body() project: CreateProjectDto, @Param('id') id: number): Promise<ProjectEntity | HttpException> {
+        return this.projectService.create(project, id);
     }
 
     @Put(':id')
