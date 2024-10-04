@@ -6,25 +6,32 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { TaskError } from './exceptions/task.enum';
 import { TaskStatus } from './dto/task.enum';
+import { ProjectService } from 'src/project/project.service';
 
 @Injectable()
 export class TaskService {
-    constructor(@InjectRepository(TaskEntity) private taskRepository: Repository<TaskEntity>) { }
+    constructor(
+        @InjectRepository(TaskEntity)
+        private taskRepository: Repository<TaskEntity>,
+        private projectRepository: ProjectService
+    ) { }
 
-    async findOne(id: number) {
-        const taskFound = await this.taskRepository.findOne({ where: { id } });
-        if (!taskFound) {
+    async findByProjectId(projectId: number) {
+        const projectFound = await this.projectRepository.findOne(projectId);
+        if (!projectFound) {
             throw new HttpException(TaskError.NOT_FOUND, HttpStatus.NOT_FOUND);
         }
-        return taskFound;
+        return projectFound.tasks;
     }
 
-    create(task: CreateTaskDto): Promise<TaskEntity> {
+    async create(task: CreateTaskDto): Promise<TaskEntity> {
         try {
+            const projectFound = await this.projectRepository.findOne(task.projectId);
             if (!task.status) {
                 task.status = TaskStatus.PENDING
             }
             const newTask = this.taskRepository.create(task);
+            newTask.project = projectFound;
             return this.taskRepository.save(newTask);
 
         } catch (error) {

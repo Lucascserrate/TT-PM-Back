@@ -9,8 +9,8 @@ export class TaskController {
     constructor(private readonly taskService: TaskService) { }
 
     @Get()
-    async findOne(@Query('project_id', ParseIntPipe) id: number) {
-        return this.taskService.findOne(id);
+    async findByProjectId(@Query('project_id', ParseIntPipe) id: number) {
+        return this.taskService.findByProjectId(id);
     }
 
     @Post()

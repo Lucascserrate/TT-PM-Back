@@ -31,8 +31,8 @@ export class ProjectService {
 
     findOne(id: number) {
         try {
-            const projectFound = this.projectRepository.findOneBy({ id });
-            if (!projectFound) return new HttpException(ProjectError.NOT_FOUND, HttpStatus.NOT_FOUND);
+            const projectFound = this.projectRepository.findOne({ where: { id }, relations: ['tasks'] });
+            if (!projectFound) throw new HttpException(ProjectError.NOT_FOUND, HttpStatus.NOT_FOUND);
             return projectFound;
         } catch (error) {
             throw new HttpException(
