@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { TaskError } from './exceptions/task.enum';
+import { TaskStatus } from './dto/task.enum';
 
 @Injectable()
 export class TaskService {
@@ -20,6 +21,9 @@ export class TaskService {
 
     create(task: CreateTaskDto): Promise<TaskEntity> {
         try {
+            if (!task.status) {
+                task.status = TaskStatus.PENDING
+            }
             const newTask = this.taskRepository.create(task);
             return this.taskRepository.save(newTask);
 

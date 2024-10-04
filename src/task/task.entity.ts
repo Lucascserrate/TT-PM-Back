@@ -11,8 +11,8 @@ export class TaskEntity {
     @Column()
     name: string;
 
-    @Column()
-    description: string;
+    @Column({ nullable: true })
+    description?: string;
 
     @Column({ type: 'enum', enum: TaskStatus, default: TaskStatus.PENDING })
     status: TaskStatus;
