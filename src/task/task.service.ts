@@ -50,6 +50,14 @@ export class TaskService {
         } catch (error) {
             throw new HttpException(TaskError.SOMETHING_WENT_WRONG_UPDATING, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
 
+    async remove(id: number) {
+        try {
+
+            return await this.taskRepository.delete(id);
+        } catch (error) {
+            throw new HttpException(TaskError.SOMETHING_WENT_WRONG_DELETING, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
