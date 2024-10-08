@@ -12,13 +12,13 @@ export class UserEntity {
     @Column()
     name: string
 
-    @Column()
+    @Column({ unique: true })
     email: string
 
     @Column()
     password: string
 
-    @Column()
+    @Column({ default: Role.USER })
     role: Role
 
     @OneToMany(() => ProjectEntity, (project) => project.user)
