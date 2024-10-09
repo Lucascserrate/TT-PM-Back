@@ -37,6 +37,21 @@ export class UserService {
         }
     }
 
+    async findByEmail(email: string) {
+        try {
+            const userFound = await this.userRepository.findOneBy({ email });
+            if (!userFound) {
+                throw new HttpException(UserError.NOT_FOUND, HttpStatus.NOT_FOUND);
+            }
+            return userFound;
+        } catch (error) {
+            throw new HttpException(
+                UserError.SOMETHING_WENT_WRONG_FETCHING,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        }
+    }
+
     async create(user: CreateUserDto) {
         try {
             const userFound = await this.userRepository.findOne({ where: { email: user.email } });
