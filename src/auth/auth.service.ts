@@ -2,6 +2,8 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { UserError } from 'src/user/exceptions/user.enum';
+import * as bcrypt from 'bcrypt';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -13,13 +15,22 @@ export class AuthService {
         try {
             const userFound = await this.userService.findByEmail(req.email)
             if (userFound) throw new HttpException(UserError.ALREADY_EXISTS, HttpStatus.CONFLICT)
-            return await this.userService.create(req)
+            return await this.userService.create({
+                ...req,
+                password: await bcrypt.hash(req.password, 10)
+            })
         } catch (error) {
             throw new HttpException(error.message, error.status)
         }
     }
 
-    login() {
-        return 'login'
+    async login({ email, password }: LoginDto) {
+        const userFound = await this.userService.findByEmail(email)
+        if (!userFound) throw new HttpException("Email is wrong", HttpStatus.UNAUTHORIZED)
+
+        const isMatch = await bcrypt.compare(password, userFound.password)
+        if (!isMatch) throw new HttpException("Password is wrong", HttpStatus.UNAUTHORIZED)
+
+        return userFound
     }
 }
