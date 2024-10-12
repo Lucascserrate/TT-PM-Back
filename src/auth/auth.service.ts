@@ -4,12 +4,14 @@ import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { UserError } from 'src/user/exceptions/user.enum';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
 
     constructor(
-        private readonly userService: UserService
+        private readonly userService: UserService,
+        private readonly jwtService: JwtService
     ) { }
     async register(req: CreateUserDto) {
         try {
@@ -31,6 +33,10 @@ export class AuthService {
         const isMatch = await bcrypt.compare(password, userFound.password)
         if (!isMatch) throw new HttpException("Password is wrong", HttpStatus.UNAUTHORIZED)
 
-        return userFound
+        const payload = { email: userFound.email }
+
+        const token = await this.jwtService.signAsync(payload)
+
+        return { user: userFound, token }
     }
 }
