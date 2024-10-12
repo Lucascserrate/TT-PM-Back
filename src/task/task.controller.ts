@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query 
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { TaskEntity } from './task.entity';
+import { UpdateTaskDto } from './dto/update-task.dto';
 
 @Controller('task')
 export class TaskController {
@@ -19,7 +20,7 @@ export class TaskController {
     }
 
     @Patch(':id')
-    async update(@Param('id') id: number, @Body() task: CreateTaskDto) {
+    async update(@Param('id') id: number, @Body() task: UpdateTaskDto) {
         return this.taskService.update(id, task);
     }
 
